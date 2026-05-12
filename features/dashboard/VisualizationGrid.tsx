@@ -28,17 +28,17 @@ export function VisualizationGrid({
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-slate-200/70">
-              Forecast Trace
+              GNSS Residual Monitor
             </div>
             <div className="mt-1 text-sm font-semibold tracking-tight text-slate-50">
-              Predicted vs measured error dynamics
+              Measured residual &amp; forecast trace
             </div>
             <div className="mt-1 text-xs text-muted">
-              Production-grade telemetry chart (Recharts) with glow + trading-style tooltip.
+              1 Hz telemetry with horizon forecast and 95% confidence envelope.
             </div>
           </div>
-          <div className="rounded-xl border border-[rgba(148,163,184,0.14)] bg-[rgba(2,6,23,0.45)] px-3 py-2 text-xs text-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-            Sampling: 1 Hz
+          <div className="rounded-xl border border-[rgba(148,163,184,0.14)] bg-[rgba(2,6,23,0.45)] px-3 py-2 font-mono text-[11px] text-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+            Fs 1 Hz · IST
           </div>
         </div>
 

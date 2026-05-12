@@ -5,6 +5,7 @@ import { ControlPanel } from "@/features/dashboard/ControlPanel";
 import { DashboardProvider, useDashboard } from "@/features/dashboard/dashboard-context";
 import { MetricsRow } from "@/features/dashboard/MetricsRow";
 import { VisualizationGrid } from "@/features/dashboard/VisualizationGrid";
+import { useMission } from "@/features/mission/mission-context";
 import { useNow } from "@/hooks/useNow";
 import { useMemo } from "react";
 
@@ -19,6 +20,7 @@ export function DashboardPage() {
 function DashboardPageInner() {
   const { controls, isLoading, isPredicting, runCompletedId } = useDashboard();
   const { formatted } = useNow();
+  const mission = useMission();
 
   const metrics = useMemo(() => {
     // Update metrics only when a run completes (keeps everything feeling synchronized).
@@ -50,9 +52,9 @@ function DashboardPageInner() {
         <ControlPanel />
         <VisualizationGrid
           controls={controls}
-          runNonce={runCompletedId}
-          isRunning={isLoading || isPredicting}
-          anomalyDetected={anomalyDetected}
+          runNonce={runCompletedId + (mission.anomaly?.id ?? 0)}
+          isRunning={isLoading || isPredicting || mission.active}
+          anomalyDetected={anomalyDetected || Boolean(mission.anomaly)}
         />
         <MetricsRow
           rmse={metrics.rmse}
