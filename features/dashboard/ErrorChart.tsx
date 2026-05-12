@@ -62,11 +62,30 @@ export const ErrorChart = memo(function ErrorChart({ controls, runNonce, classNa
 
   const [futureReveal, setFutureReveal] = useState({ runNonce, value: 0 });
   const [isMounted, setIsMounted] = useState(false);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setIsMounted(true));
     return () => cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      const width = Math.floor(entry.contentRect.width);
+      const height = Math.floor(entry.contentRect.height);
+      setChartSize((current) => {
+        if (current.width === width && current.height === height) return current;
+        return { width, height };
+      });
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -114,13 +133,14 @@ export const ErrorChart = memo(function ErrorChart({ controls, runNonce, classNa
   const futureStartLabel = base[HISTORY_POINTS]?.tsLabel;
   const futureEndLabel = base[base.length - 1]?.tsLabel;
   const tickColor = "rgba(226,232,240,0.55)";
+  const chartReady = isMounted && chartSize.width > 1 && chartSize.height > 1;
 
   return (
-    <div className={cn("relative h-[320px] w-full", className)}>
+    <div ref={containerRef} className={cn("relative h-[320px] w-full", className)}>
       <div className="pointer-events-none absolute inset-0 opacity-70 [background:radial-gradient(900px_280px_at_40%_0%,rgba(34,211,238,0.18),transparent_55%)]" />
 
-      {isMounted ? (
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={320}>
+      {chartReady ? (
+        <ResponsiveContainer width={chartSize.width} height={chartSize.height} minWidth={1} minHeight={320}>
           <LineChart
             data={data}
             margin={{ top: 18, right: 14, bottom: 6, left: 8 }}
