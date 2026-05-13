@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NavAI – GNSS Satellite Intelligence Platform
 
-## Getting Started
+NavAI is a full-stack aerospace-inspired telemetry dashboard that visualizes GNSS satellite residual behavior and predicts future drift patterns using machine learning.
 
-First, run the development server:
+The project combines:
+
+* real GNSS datasets
+* Ridge Regression forecasting
+* live telemetry replay
+* interactive orbital visualization
+* real-time dashboard monitoring
+
+---
+## 🌐 Live Demo
+
+# Frontend:
+https://new-nav-detect.vercel.app/
+
+# Backend API:
+https://navai-backend.onrender.com/
+
+API Docs:
+https://navai-backend.onrender.com/docs
+
+## 🚀 Features
+
+* 3D Earth and satellite visualization
+* Live telemetry streaming
+* Residual prediction forecasting
+* RMSE and MAE monitoring
+* Anomaly detection simulation
+* AI insights dashboard
+* Mission-control style UI
+
+---
+
+## 🧠 Machine Learning
+
+The backend uses a Ridge Regression model trained on GNSS residual telemetry.
+
+Residuals are computed using:
+
+Residual = Broadcast Value − Precise Value
+
+A sliding window approach is used to predict future residual values from historical telemetry.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* Next.js
+* TypeScript
+* Tailwind CSS
+* React Three Fiber
+* Recharts
+
+### Backend
+
+* FastAPI
+* Python
+* Scikit-learn
+* Pandas
+* NumPy
+
+---
+
+## 🌐 Architecture
+
+Frontend (Next.js)
+↓
+FastAPI Backend
+↓
+ML Prediction Runtime
+↓
+GNSS Dataset Replay Engine
+
+---
+
+## ▶️ Running Locally
+
+### Frontend
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Backend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pip install -r requirements.txt
+python -m app.train
+python -m uvicorn app.main:app --reload
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 📡 Deployment
 
-To learn more about Next.js, take a look at the following resources:
+* Frontend hosted on Vercel
+* Backend hosted on Render
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 👨‍💻 Author
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Shushant Kumar Awasthi
+Final Year Capstone Project
