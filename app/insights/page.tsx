@@ -2,6 +2,7 @@
 
 import { Select } from "@/components/ui/Select";
 import { useMission } from "@/features/mission/mission-context";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { cn } from "@/lib/cn";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -84,6 +85,7 @@ export default function InsightsRoute() {
   const [lastAssessed, setLastAssessed] = useState<number | null>(null);
   const idRef = useRef(0);
   const mission = useMission();
+  const telemetry = useTelemetry();
 
   // Mission anomaly injection: bump variance/divergence and drop a WARN into
   // the feed the moment a new mission-level anomaly event arrives.
@@ -119,6 +121,28 @@ export default function InsightsRoute() {
       ].slice(0, FEED_LIMIT),
     );
   }, [mission.anomaly]);
+
+  // When the telemetry replay cycle restarts, emit a feed observation so the
+  // insights page reflects the seamless wrap-around.
+  const prevCycleRef = useRef(telemetry.cycleEvent);
+  useEffect(() => {
+    if (telemetry.cycleEvent === prevCycleRef.current) return;
+    prevCycleRef.current = telemetry.cycleEvent;
+    idRef.current += 1;
+    setFeed((cur) =>
+      [
+        {
+          id: idRef.current,
+          at: Date.now(),
+          severity: "INFO" as const,
+          kind: "recovery" as const,
+          tag: "STREAM",
+          message: `Telemetry replay cycle restarted (cycle ${telemetry.cycleCount}); stream continuous.`,
+        },
+        ...cur,
+      ].slice(0, FEED_LIMIT),
+    );
+  }, [telemetry.cycleEvent, telemetry.cycleCount]);
 
   // 1 Hz simulator — evolves state deterministically with slow drift,
   // occasional regime shifts, and rare anomalies.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMission } from "@/features/mission/mission-context";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { cn } from "@/lib/cn";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -68,6 +69,7 @@ const LOG_LIMIT = 80;
 export default function SystemRoute() {
   const [state, setState] = useState<SystemState>(initialState);
   const mission = useMission();
+  const telemetry = useTelemetry();
 
   // When a mission anomaly arrives, stamp a WARN log and inject a burst packet
   // so the pipeline canvas visibly reacts.
@@ -107,6 +109,28 @@ export default function SystemRoute() {
       };
     });
   }, [mission.anomaly]);
+
+  // When the telemetry replay cycle restarts, emit a runtime log so the
+  // console reflects the seamless wrap-around.
+  const prevCycleRef = useRef(telemetry.cycleEvent);
+  useEffect(() => {
+    if (telemetry.cycleEvent === prevCycleRef.current) return;
+    prevCycleRef.current = telemetry.cycleEvent;
+    setState((s) => {
+      const logSeq = s.logSeq + 1;
+      const logs = [
+        ...s.logs,
+        {
+          id: logSeq,
+          at: Date.now(),
+          level: "INFO" as const,
+          source: "stream",
+          msg: `telemetry replay cycle restarted (cycle ${telemetry.cycleCount})`,
+        },
+      ].slice(-LOG_LIMIT);
+      return { ...s, logs, logSeq };
+    });
+  }, [telemetry.cycleEvent, telemetry.cycleCount]);
 
   // 1 Hz "slow loop": emits packets, rotates cycle phase, mutates model runtime,
   // appends runtime logs.

@@ -467,61 +467,134 @@ function Satellite({
         />
       </line>
       <group ref={bodyRef}>
+        {/* Bus body — compact rectangular prism, slightly flattened */}
         <mesh castShadow>
-          <boxGeometry args={[config.size * 1.42, config.size * 0.78, config.size * 0.78]} />
+          <boxGeometry args={[config.size * 1.2, config.size * 0.6, config.size * 0.7]} />
           <meshStandardMaterial
             color={config.bodyColor}
             emissive={config.glowColor}
-            emissiveIntensity={anomalyDetected ? 0.72 : 0.32}
-            roughness={0.28}
-            metalness={0.72}
+            emissiveIntensity={anomalyDetected ? 0.55 : 0.18}
+            roughness={0.32}
+            metalness={0.78}
           />
         </mesh>
 
-        <mesh position={[config.size * 1.38, 0, 0]}>
-          <boxGeometry args={[config.size * 1.7, config.size * 0.12, config.size * 0.84]} />
+        {/* Solar panel struts */}
+        <mesh position={[config.size * 0.82, 0, 0]}>
+          <cylinderGeometry args={[config.size * 0.02, config.size * 0.02, config.size * 0.4, 6]} />
+          <meshStandardMaterial color="#475569" roughness={0.5} metalness={0.7} />
+        </mesh>
+        <mesh position={[-config.size * 0.82, 0, 0]}>
+          <cylinderGeometry args={[config.size * 0.02, config.size * 0.02, config.size * 0.4, 6]} />
+          <meshStandardMaterial color="#475569" roughness={0.5} metalness={0.7} />
+        </mesh>
+
+        {/* Solar panels — thin, wider, realistic proportions */}
+        <mesh position={[config.size * 1.55, 0, 0]}>
+          <boxGeometry args={[config.size * 1.4, config.size * 0.04, config.size * 0.72]} />
           <meshStandardMaterial
             color={config.panelColor}
             emissive={config.glowColor}
-            emissiveIntensity={anomalyDetected ? 0.32 : 0.18}
-            roughness={0.46}
-            metalness={0.54}
+            emissiveIntensity={anomalyDetected ? 0.22 : 0.08}
+            roughness={0.52}
+            metalness={0.48}
           />
         </mesh>
-        <mesh position={[-config.size * 1.38, 0, 0]}>
-          <boxGeometry args={[config.size * 1.7, config.size * 0.12, config.size * 0.84]} />
+        <mesh position={[-config.size * 1.55, 0, 0]}>
+          <boxGeometry args={[config.size * 1.4, config.size * 0.04, config.size * 0.72]} />
           <meshStandardMaterial
             color={config.panelColor}
             emissive={config.glowColor}
-            emissiveIntensity={anomalyDetected ? 0.32 : 0.18}
-            roughness={0.46}
-            metalness={0.54}
+            emissiveIntensity={anomalyDetected ? 0.22 : 0.08}
+            roughness={0.52}
+            metalness={0.48}
           />
         </mesh>
 
-        <mesh position={[0, config.size * 0.72, 0]}>
-          <cylinderGeometry args={[config.size * 0.045, config.size * 0.045, config.size * 1.05, 10]} />
+        {/* Antenna mast */}
+        <mesh position={[0, config.size * 0.52, 0]}>
+          <cylinderGeometry args={[config.size * 0.025, config.size * 0.025, config.size * 0.55, 8]} />
           <meshStandardMaterial
-            color="#e0f2fe"
+            color="#cbd5e1"
             emissive={config.glowColor}
-            emissiveIntensity={anomalyDetected ? 0.44 : 0.16}
-            roughness={0.34}
-            metalness={0.5}
+            emissiveIntensity={anomalyDetected ? 0.3 : 0.08}
+            roughness={0.38}
+            metalness={0.6}
           />
         </mesh>
 
+        {/* Antenna dish — small parabolic silhouette */}
+        <mesh position={[0, config.size * 0.82, 0]} rotation={[Math.PI * 0.12, 0, 0]}>
+          <sphereGeometry args={[config.size * 0.18, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.45]} />
+          <meshStandardMaterial
+            color="#94a3b8"
+            emissive={config.glowColor}
+            emissiveIntensity={anomalyDetected ? 0.2 : 0.05}
+            roughness={0.4}
+            metalness={0.65}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Telemetry blinking light — restrained, slow blink */}
+        <TelemetryLED
+          position={[0, -config.size * 0.32, config.size * 0.36]}
+          color={anomalyDetected ? "#fb923c" : config.glowColor}
+          phase={config.phase}
+          anomaly={anomalyDetected}
+        />
+
+        {/* Proximity glow sphere — very subtle */}
         <mesh ref={glowRef}>
-          <sphereGeometry args={[config.size * 1.08, 18, 18]} />
+          <sphereGeometry args={[config.size * 0.9, 14, 14]} />
           <meshBasicMaterial
             color={config.glowColor}
             transparent
-            opacity={anomalyDetected ? 0.28 : 0.12}
+            opacity={anomalyDetected ? 0.18 : 0.06}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
           />
         </mesh>
       </group>
     </group>
+  );
+}
+
+function TelemetryLED({
+  position,
+  color,
+  phase,
+  anomaly,
+}: {
+  position: [number, number, number];
+  color: string;
+  phase: number;
+  anomaly: boolean;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const mat = meshRef.current.material as THREE.MeshBasicMaterial;
+    // Slow blink: ~0.8 Hz normal, ~2 Hz during anomaly
+    const freq = anomaly ? 4.2 : 1.6;
+    const blink = 0.5 + 0.5 * Math.sin(clock.elapsedTime * freq + phase);
+    const minOpacity = anomaly ? 0.25 : 0.08;
+    const maxOpacity = anomaly ? 0.85 : 0.55;
+    mat.opacity = minOpacity + blink * (maxOpacity - minOpacity);
+  });
+
+  return (
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[0.006, 8, 8]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={0.3}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </mesh>
   );
 }
 
