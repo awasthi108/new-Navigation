@@ -107,4 +107,7 @@ python -m uvicorn app.main:app --reload
 ## 👨‍💻 Author
 
 Shushant Kumar Awasthi
+
+Rudhra Pratap Singh
+
 Final Year Capstone Project
